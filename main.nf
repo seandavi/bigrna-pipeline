@@ -48,7 +48,7 @@ process produceSequences {
     // publishDir "s3://starbuck1/tmp/${srr}", mode: 'copy'
 
     input:
-    set srx, srr from srrs
+    set srx, srr, taxon_id from srrs
 
     output:
         set val(srx), file("*fastq*") into (records, records2, records3, records4) mode flatten
