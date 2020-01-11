@@ -45,14 +45,8 @@ log.info """\
 
 process produceSequences {
     tag { srr }
-    cpus 4
-    memory "8GB"
-    time '6h'
-    //queue "ccr,norm"
-    //module "sratoolkit/2.9.2"
-    // module "aws"
+    module "sratoolkit"
     // clusterOptions " --gres lscratch:200"
-    // publishDir "s3://starbuck1/tmp/${srr}", mode: 'copy'
 
     input:
     set srx, srr, taxon_id from srrs
@@ -83,11 +77,10 @@ records.groupTuple().into(se)
 
 process salmon {
     tag { srx }
-    // container 'combinelab/salmon'
-    cpus 4
+    cpus 8
     time '8h'
-    memory '8GB'
-    // module "salmon/0.11.3"
+    memory '16GB'
+    module "salmon"
 
     publishDir "s3://s3.bigrna.cancerdatasci.org/results1/${species}/${transcript_version}"
 
@@ -102,7 +95,7 @@ process salmon {
     shell:
     r = wrap_items(abc)
     """
-    salmon quant -p ${task.cpus} -g ${gtf} --gcBias --seqBias --numBootstraps 25 --index ${idx} -l A -o ${srx}`python /Users/sdavis2/Documents/git/BIGRNA_PROJECT/bigrna-pipeline/make_salmon_read_string.py ${r}`
+    salmon quant -p ${task.cpus} -g ${gtf} --gcBias --seqBias --numBootstraps 25 --index ${idx} -l A -o ${srx}`python $workflow.launchDir/make_salmon_read_string.py ${r}`
     gzip ${srx}/quant.sf
     gzip ${srx}/quant.genes.sf
     gzip ${srx}/aux_info/ambig_info.tsv
