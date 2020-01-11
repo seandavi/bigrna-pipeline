@@ -11,5 +11,5 @@ wget -qO- https://get.nextflow.io | bash
 ## Run
 
 ```bash
-./nextflow run main.nf --experiment=SRX000237
+./nextflow run main.nf --experiment=SRX000237 --index=
 ```
