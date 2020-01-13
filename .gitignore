@@ -1,0 +1,6 @@
+.nextflow
+.nextflow.lo*
+.venv
+__pycache__
+bigrna_pipeline.egg-info
+*~
