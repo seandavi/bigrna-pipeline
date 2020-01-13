@@ -46,6 +46,7 @@ log.info """\
 process produceSequences {
     tag { srr }
     module "sratoolkit"
+    cpus 16
     // clusterOptions " --gres lscratch:200"
 
     input:
@@ -77,12 +78,12 @@ records.groupTuple().into(se)
 
 process salmon {
     tag { srx }
-    cpus 8
+    cpus 16
     time '8h'
-    memory '16GB'
+    memory '32GB'
     module "salmon"
 
-    publishDir "s3://s3.bigrna.cancerdatasci.org/results1/${species}/${transcript_version}"
+    publishDir "gs://temp-testing/results1/${species}/${transcript_version}"
 
     input:
     set srx, file(abc) from se
@@ -95,7 +96,7 @@ process salmon {
     shell:
     r = wrap_items(abc)
     """
-    salmon quant -p ${task.cpus} -g ${gtf} --gcBias --seqBias --numBootstraps 25 --index ${idx} -l A -o ${srx}`python $workflow.launchDir/make_salmon_read_string.py ${r}`
+    salmon quant -p ${task.cpus} -g ${gtf} --gcBias --seqBias --biasSpeedSamp 10 --numBootstraps 25 --index ${idx} -l A -o ${srx}`python $workflow.launchDir/make_salmon_read_string.py ${r}`
     gzip ${srx}/quant.sf
     gzip ${srx}/quant.genes.sf
     gzip ${srx}/aux_info/ambig_info.tsv
