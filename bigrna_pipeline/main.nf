@@ -64,8 +64,8 @@ process produceSequences {
     until [ $n -ge 5 ]
     do
       n=0
-      #fasterq-dump -e !{task.cpus} -f --skip-technical --split-files !{srr}  && break  
-      fastq-dump -X 1000000 --skip-technical --split-files !{srr}  && break  
+      fasterq-dump -e !{task.cpus} -f --skip-technical --split-files !{srr}  && break  
+      #fastq-dump -X 1000000 --skip-technical --split-files !{srr}  && break  
       n=$[$n+1]
       sleep 15
     done
