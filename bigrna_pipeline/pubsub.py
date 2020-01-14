@@ -12,7 +12,7 @@ SUBSCRIPTION = 'my-sub'
 
 def make_command_line(experiment: str, index: str, gtf: str):
     nf_loc = pkg_resources.resource_filename('bigrna_pipeline', 'main.nf')
-    return f'. ./nextflow run {nf_loc} --experiment {experiment} --with-trace --with-report report.html --index {index} --gtf {gtf} --transcript_version v32'.split()
+    return f'./nextflow run {nf_loc} --experiment {experiment} --with-trace --with-report report.html --index {index} --gtf {gtf} --transcript_version v32'.split()
 
 # Define the callback.
 # Note that the callback is defined *before* the subscription is opened.
