@@ -2,6 +2,8 @@ from google.cloud import pubsub
 
 import subprocess
 import logging
+import traceback
+import sys
 
 import pkg_resources
 
@@ -24,6 +26,7 @@ def callback(message):
         subprocess.run(z)
         message.ack()
     except Exception:
+        traceback.print_exc(file=sys.stderr)
         logging.error(f'missed message {message}')
         message.ack()
 
