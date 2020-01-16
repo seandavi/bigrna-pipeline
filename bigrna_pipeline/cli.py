@@ -15,7 +15,8 @@ def get_nextflow():
 
 @bigrna.command(help='start a bigrna pubsub-based worker')
 def start_worker():
-    future.result()
+    while True:
+        future.result()
 
 @bigrna.command()
 def check_loc():
