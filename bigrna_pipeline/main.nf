@@ -43,9 +43,9 @@ log.info """\
 
 process produceSequences {
     tag { srr }
-    // module "sratoolkit"
-    cpus 8
-    memory "15GB"
+    module "sratoolkit"
+    cpus 16
+    memory "32GB"
     // clusterOptions " --gres lscratch:200"
 
     input:
@@ -78,10 +78,9 @@ records.groupTuple().into(se)
 
 process salmon {
     tag { params.run_id }
-    cpus 8
-    time '8h'
-    memory '15GB'
-    // module "salmon"
+    cpus 16
+    memory '32GB'
+    module "salmon/1.0.0"
 
     publishDir "gs://temp-testing/results2/${params.run_id}/"
 
