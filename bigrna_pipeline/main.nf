@@ -4,15 +4,13 @@ Usage:
 
 nextflow main.nf --
 
-*/
+ */
 
 import groovy.json.JsonSlurper
 
 def jsonSlurper = new JsonSlurper()
 
 res = jsonSlurper.parse(new URL('https://api.omicidx.cancerdatasci.org/sra/experiments/' + params.experiment + '/runs?size=500'))
-
-println(res)
 
 def wrap_items(input_files) {
   def result =  input_files instanceof Path ? input_files.toString() : (input_files as List).join(',')
@@ -45,8 +43,9 @@ log.info """\
 
 process produceSequences {
     tag { srr }
-    module "sratoolkit"
-    cpus 16
+    // module "sratoolkit"
+    cpus 8
+    memory "15GB"
     // clusterOptions " --gres lscratch:200"
 
     input:
@@ -78,13 +77,13 @@ se = Channel.create()
 records.groupTuple().into(se)
 
 process salmon {
-    tag { srx }
-    cpus 16
+    tag { params.run_id }
+    cpus 8
     time '8h'
-    memory '32GB'
-    module "salmon"
+    memory '15GB'
+    // module "salmon"
 
-    publishDir "gs://temp-testing/results1/${params.run_id}/"
+    // publishDir "gs://temp-testing/results1/${params.run_id}/"
 
     input:
     set srx, file(abc) from se
@@ -92,16 +91,16 @@ process salmon {
     file(gtf) from gtf
 
     output:
-        file("${srx}/*") into quants
+        file("${params.run_id}/**") into quants
 
     shell:
     r = wrap_items(abc)
     """
-    salmon quant -p ${task.cpus} -g ${gtf} --gcBias --seqBias --biasSpeedSamp 10 --numBootstraps 25 --index ${idx} -l A -o ${srx}`python $workflow.launchDir/make_salmon_read_string.py ${r}`
-    gzip ${srx}/quant.sf
-    gzip ${srx}/quant.genes.sf
-    gzip ${srx}/aux_info/ambig_info.tsv
+    salmon quant -p ${task.cpus} -g ${gtf} --gcBias --seqBias --biasSpeedSamp 10 --numBootstraps 25 --index ${idx} -l A -o ${params.run_id}`python $workflow.launchDir/make_salmon_read_string.py ${r}`
+    gzip ${params.run_id}/quant.sf
+    gzip ${params.run_id}/quant.genes.sf
+    gzip ${params.run_id}/aux_info/ambig_info.tsv
+    find ${params.run_id} -type f -print0 | xargs -0 md5sum-lite > ${params.run_id}/manifest.md5
     """
 }
 
-quants.subscribe{ println("$it") }
