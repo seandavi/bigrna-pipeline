@@ -10,8 +10,11 @@ import pkg_resources
 
 subscriber = pubsub.SubscriberClient()
 
-PROJECT = 'isb-cgc-01-0006'
-SUBSCRIPTION = 'my-sub'
+class Config():
+    DATABASE_URL = os.environ.get('DATABASE_URL')
+    PROJECT_ID = os.environ.get("PROJECT_ID")
+    PUBSUB_SUBSCRIPTION = os.environ.get("PUBSUB_SUBSCRIPTION")
+    PUBSUB_TOPIC = os.environ.get("PUBSUB_TOPIC")
 
 def make_command_line(experiment: str, run_id: str, index: str, gtf: str):
     nf_loc = pkg_resources.resource_filename('bigrna_pipeline', 'main.nf')
@@ -37,7 +40,7 @@ def callback(message):
     
 # Substitute PROJECT and SUBSCRIPTION with appropriate values for your
 # application.
-subscription_path = subscriber.subscription_path(PROJECT, SUBSCRIPTION)
+subscription_path = subscriber.subscription_path(Config.PROJECT_ID, Config.PUBSUB_SUBSCRIPTION)
 
 # Open the subscription, passing the callback.
 fc = pubsub.types.FlowControl(max_messages=1, max_lease_duration=18000)

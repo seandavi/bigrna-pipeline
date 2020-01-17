@@ -83,7 +83,7 @@ process salmon {
     memory '15GB'
     // module "salmon"
 
-    // publishDir "gs://temp-testing/results1/${params.run_id}/"
+    publishDir "gs://temp-testing/results2/${params.run_id}/"
 
     input:
     set srx, file(abc) from se
@@ -100,7 +100,7 @@ process salmon {
     gzip ${params.run_id}/quant.sf
     gzip ${params.run_id}/quant.genes.sf
     gzip ${params.run_id}/aux_info/ambig_info.tsv
-    find ${params.run_id} -type f -print0 | xargs -0 md5sum-lite > ${params.run_id}/manifest.md5
+    find ${params.run_id}/ -type f > ${params.run_id}/manifest.txt
     """
 }
 
