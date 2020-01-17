@@ -37,7 +37,7 @@ log.info """\
  SRA Experiment       := ${params.experiment}
  gtf file             := ${params.gtf}
  transcript version   := ${params.transcript_version}
- taxon_id             := ${params.transcript_version}
+ run_id               := ${params.run_id}
  ====================================
 
  """
@@ -84,7 +84,7 @@ process salmon {
     memory '32GB'
     module "salmon"
 
-    publishDir "gs://temp-testing/results1/${species}/${transcript_version}"
+    publishDir "gs://temp-testing/results1/${params.run_id}/"
 
     input:
     set srx, file(abc) from se

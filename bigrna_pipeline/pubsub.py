@@ -4,6 +4,7 @@ import subprocess
 import logging
 import traceback
 import sys
+import json
 
 import pkg_resources
 
@@ -12,15 +13,16 @@ subscriber = pubsub.SubscriberClient()
 PROJECT = 'isb-cgc-01-0006'
 SUBSCRIPTION = 'my-sub'
 
-def make_command_line(experiment: str, index: str, gtf: str):
+def make_command_line(experiment: str, run_id: str, index: str, gtf: str):
     nf_loc = pkg_resources.resource_filename('bigrna_pipeline', 'main.nf')
-    return f'./nextflow run {nf_loc} --experiment {experiment} --with-trace --with-report report.html --index {index} --gtf {gtf} --transcript_version v32'.split()
+    return f'./nextflow run {nf_loc} --run_id {run_id} --experiment {experiment} --with-trace --with-report report.html --index {index} --gtf {gtf} --transcript_version v32'.split()
 
 def callback(message):
     print(message)  # Replace this with your actual logic.
+    dat = json.loads(message.data.decode('UTF-8'))
     idx = 'gencode.v32.all_transcripts.k31'
     gtf = 'gencode.v32.annotation.gtf.gz'
-    z = make_command_line(message.data.decode('UTF-8'), idx, gtf)
+    z = make_command_line(dat['accession'], dat['run'], idx, gtf)
     logging.info(f'got new message {message}')
     try:
         subprocess.run(z)
