@@ -9,6 +9,8 @@ import os
 
 import pkg_resources
 
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
 subscriber = pubsub.SubscriberClient()
 
 class Config():
