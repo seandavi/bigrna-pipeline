@@ -119,7 +119,7 @@ process put_files {
 
     shell:
     """
-    gsutil -h x-goog-meta-bigrna-run:${params.run_id}  cp ${to_send} gs://temp-testing/results2/${params.run_id}/${to_send}
+    gsutil -h x-goog-meta-bigrna-run:${params.run_id}  cp ${to_send} gs://bigrna-cancerdatasci-org/v2/${params.run_id}/${to_send}
     """
 }
 
