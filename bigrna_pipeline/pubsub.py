@@ -21,7 +21,7 @@ class Config():
 
 def make_command_line(experiment: str, run_id: str, index: str, gtf: str):
     nf_loc = pkg_resources.resource_filename('bigrna_pipeline', 'main.nf')
-    return f'./nextflow run {nf_loc} --run_id {run_id} --experiment {experiment} --with-trace --with-report report.html --index {index} --gtf {gtf} --transcript_version v32'.split()
+    return f'./nextflow run {nf_loc} --run_id {run_id} --experiment {experiment} -with-trace -with-report report.html --index {index} --gtf {gtf} --transcript_version v32'.split()
 
 def callback(message):
     print(message)  # Replace this with your actual logic.
