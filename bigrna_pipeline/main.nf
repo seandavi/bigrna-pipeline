@@ -2,7 +2,14 @@
 /*
 Usage:
 
-nextflow main.nf --
+nextflow run {nf_loc} \
+  --run_id {run_id} \
+  --experiment {experiment} \
+  --with-trace \
+  --with-report report.html \
+  --index {index} \
+  --gtf {gtf} \
+  --transcript_version v32
 
  */
 
@@ -37,6 +44,7 @@ log.info """\
  transcript version   := ${params.transcript_version}
  run_id               := ${params.run_id}
  ====================================
+
 
  """
 
@@ -82,7 +90,7 @@ process salmon {
     memory '32GB'
     module "salmon/1.0.0"
 
-    publishDir "gs://temp-testing/results2/${params.run_id}/"
+    //publishDir "gs://temp-testing/results2/${params.run_id}/"
 
     input:
     set srx, file(abc) from se
@@ -100,6 +108,18 @@ process salmon {
     gzip ${params.run_id}/quant.genes.sf
     gzip ${params.run_id}/aux_info/ambig_info.tsv
     find ${params.run_id}/ -type f > ${params.run_id}/manifest.txt
+    """
+}
+
+process put_files {
+    tag { params.run_id }
+
+    input:
+    file to_send from quants.flatten()
+
+    shell:
+    """
+    gsutil -h x-goog-meta-bigrna-run:${params.run_id}  cp ${to_send} gs://temp-testing/results2/${params.run_id}/${to_send}
     """
 }
 
