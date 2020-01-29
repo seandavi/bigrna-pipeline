@@ -46,7 +46,7 @@ def callback(message):
 subscription_path = subscriber.subscription_path(Config.PROJECT_ID, Config.PUBSUB_SUBSCRIPTION)
 
 # Open the subscription, passing the callback.
-fc = pubsub.types.FlowControl(max_messages=1, max_lease_duration=18000)
+fc = pubsub.types.FlowControl(max_messages=1, max_lease_duration=7*24*60*60) #7 days
 logging.info(f'awaiting messages')
 future = subscriber.subscribe(subscription_path, callback, flow_control=fc)
 
