@@ -39,6 +39,9 @@ def callback(message):
         message.ack()
 
     # cleanup directory
+    logging.info('copying trace and report files')
+    subprocess.run(f'gsutil cp -h x-goog-meta-bigrna-run:{dat["run"]} trace.txt gs://bigrna-cancerdatasci-org/v2/{dat["run"]}/trace.txt', shell=True)
+    subprocess.run(f'gsutil cp -h x-goog-meta-bigrna-run:{dat["run"]} report.html gs://bigrna-cancerdatasci-org/v2/{dat["run"]}/report.html', shell=True)
     subprocess.run('rm -rf work', shell=True)
     
 # Substitute PROJECT and SUBSCRIPTION with appropriate values for your
