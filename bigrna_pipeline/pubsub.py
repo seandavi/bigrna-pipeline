@@ -76,9 +76,10 @@ def succeeded_pipeline(process: subprocess.Popen, message: pubsub_v1.types.messa
         f.write(f'{message} succeeded with exit code {process.poll()}')
     
 
-def cleanup():
+def cleanup(message):
     # cleanup directory
-    logging.info('cleaning up trace and report files')
+    dat = json.loads(message.data.decode('UTF-8'))
+    logging.info('Finishing up....')
     files_to_capture = [
         'success.txt',
         'failed.txt',
