@@ -24,26 +24,45 @@ def make_command_line(experiment: str, run_id: str, index: str, gtf: str):
     return f'./nextflow run {nf_loc} --run_id {run_id} --experiment {experiment} -with-trace -with-report report.html --index {index} --gtf {gtf} --transcript_version v32'.split()
 
 def callback(message):
-    print(message)  # Replace this with your actual logic.
+    logging.info('handling message %s', message)
     dat = json.loads(message.data.decode('UTF-8'))
     idx = 'gencode.v32.all_transcripts.k31'
     gtf = 'gencode.v32.annotation.gtf.gz'
     z = make_command_line(dat['accession'], dat['run'], idx, gtf)
-    logging.info(f'got new message {message}')
-    try:
-        subprocess.run(z)
-        message.ack()
-    except Exception:
-        traceback.print_exc(file=sys.stderr)
-        logging.error(f'missed message {message}')
-        message.ack()
+    logging.debug(f'running command "{z}"')    
+    proc_result = subprocess.run(z, capture_output = True)
+    if(proc_result.returncode==0): #successful
+        logging.info(f'successfully completed {message}')
+        with open('success.txt', 'w') as f:
+            f.writelines(proc_result.stdout.decode('UTF-8'))
+    else:
+        logging.error(f'{message} failed with exit code {proc_result.returncode}')
+        with open('failed.txt', 'w') as f:
+            f.writelines(proc_result.stderr.decode('UTF-8'))
+        
+        
+    with open('process_stdout.txt', 'w') as f:
+        f.writelines(proc_result.stdout.decode('UTF-8'))
+    with open('process_stderr.txt', 'w') as f:
+        f.writelines(proc_result.stderr.decode('UTF-8'))
+    # we are going to ack everything
+    message.ack()
+    logging.debug(f'generated command-line {z}')
 
     # cleanup directory
     logging.info('copying trace and report files')
-    subprocess.run(f'gsutil -h x-goog-meta-bigrna-run:{dat["run"]} cp trace.txt gs://bigrna-cancerdatasci-org/v2/{dat["run"]}/trace.txt', shell=True)
-    subprocess.run(f'gsutil -h x-goog-meta-bigrna-run:{dat["run"]} cp report.html gs://bigrna-cancerdatasci-org/v2/{dat["run"]}/report.html', shell=True)
+    files_to_capture = [
+        'success.txt',
+        'failed.txt',
+        'process_stdout.txt',
+        'process_stderr.txt',
+        'trace.txt',
+        'report.html'
+    ]
+    for fname in files_to_capture:
+        subprocess.run(f'gsutil -h x-goog-meta-bigrna-run:{dat["run"]} cp {fname} gs://bigrna-cancerdatasci-org/v2/{dat["run"]}/{fname}', shell=True)
     subprocess.run('rm -rf work', shell=True)
-    subprocess.run('rm trace.txt report.html', shell=True)
+    subprocess.run('rm '+' '.join(files_to_capture), shell=True)
     
 # Substitute PROJECT and SUBSCRIPTION with appropriate values for your
 # application.
@@ -55,4 +74,5 @@ logging.info(f'awaiting messages')
 future = subscriber.subscribe(subscription_path, callback, flow_control=fc)
 
 if __name__ == '__main__':
-    future.result()
+    while True:
+        future.result()
