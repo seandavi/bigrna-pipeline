@@ -31,8 +31,7 @@ def callback(message):
     z = make_command_line(dat['accession'], dat['run'], idx, gtf)
     logging.debug(f'running command "{z}"')
     try:
-        proc_result = subprocess.run(z, capture_output = True)
-        
+        proc_result = subprocess.run(z, capture_output = True, check = True)
         if(proc_result.returncode==0): #successful
             logging.info(f'successfully completed {message}')
             with open('success.txt', 'w') as f:
