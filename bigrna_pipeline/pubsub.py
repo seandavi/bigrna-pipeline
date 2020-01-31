@@ -74,5 +74,4 @@ logging.info(f'awaiting messages')
 future = subscriber.subscribe(subscription_path, callback, flow_control=fc)
 
 if __name__ == '__main__':
-    while True:
-        future.result()
+    future.result()
