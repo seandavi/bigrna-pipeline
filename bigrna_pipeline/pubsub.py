@@ -56,22 +56,22 @@ def write_std_files(process: subprocess.Popen):
         return stream.read().decode('UTF-8')
     stdout_str = get_stream_as_str(process.stdout)
     stderr_str = get_stream_as_str(process.stderr)
-    with open('process_stdout.txt', 'w') as f:
+    with open('stdout.txt', 'w') as f:
         f.write(stdout_str)
     sys.stdout.writelines(stdout_str)
-    with open('process_stderr.txt', 'w') as f:
+    with open('stderr.txt', 'w') as f:
         f.write(stderr_str)
     sys.stderr.write(stderr_str)
     
 
 def failed_pipeline(process: subprocess.Popen, message: pubsub_v1.types.message):
-    logging.exception(f'{message} failed with exit code {process.poll()}')
+    logging.error(f'{message} failed with exit code {process.poll()}')
     with open('failed.txt', 'w') as f:
         f.write(f'{message} failed with exit code {process.poll()}')
     
 
 def succeeded_pipeline(process: subprocess.Popen, message: pubsub_v1.types.message):
-    logging.exception(f'{message} succeeded with exit code {process.poll()}')
+    logging.info(f'{message} succeeded with exit code {process.poll()}')
     with open('success.txt', 'w') as f:
         f.write(f'{message} succeeded with exit code {process.poll()}')
     
@@ -83,8 +83,8 @@ def cleanup(message):
     files_to_capture = [
         'success.txt',
         'failed.txt',
-        'process_stdout.txt',
-        'process_stderr.txt',
+        'stdout.txt',
+        'stderr.txt',
         'trace.txt',
         'report.html'
     ]
@@ -100,15 +100,20 @@ def run_to_death():
         message = get_next_message()
         print(message)
         process = start_nextflow_subprocess(message.message)
+        n = 0
+        SLEEP_INTERVAL=10
         while process.poll() is None:
             subscriber.modify_ack_deadline(
                 subscription_path,
                 [message.ack_id],
                 ack_deadline_seconds=480,
             )
-            time.sleep(5)
-            sys.stderr.write('.')
-            sys.stderr.flush()
+            time.sleep(SLEEP_INTERVAL)
+            if(n % 120 == 0):
+                logging.info('waiting for process to complete')
+            n+=SLEEP_INTERVAL
+            # sys.stderr.write('.')
+            # sys.stderr.flush()
         if process.poll() == 0:
             succeeded_pipeline(process, message.message)
         else:
