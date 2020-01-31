@@ -29,14 +29,16 @@ def callback(message):
     idx = 'gencode.v32.all_transcripts.k31'
     gtf = 'gencode.v32.annotation.gtf.gz'
     z = make_command_line(dat['accession'], dat['run'], idx, gtf)
-    logging.debug(f'running command "{z}"')    
-    proc_result = subprocess.run(z, capture_output = True)
-    if(proc_result.returncode==0): #successful
-        logging.info(f'successfully completed {message}')
-        with open('success.txt', 'w') as f:
-            f.writelines(proc_result.stdout.decode('UTF-8'))
-    else:
-        logging.error(f'{message} failed with exit code {proc_result.returncode}')
+    logging.debug(f'running command "{z}"')
+    try:
+        proc_result = subprocess.run(z, capture_output = True)
+        
+        if(proc_result.returncode==0): #successful
+            logging.info(f'successfully completed {message}')
+            with open('success.txt', 'w') as f:
+                f.writelines(proc_result.stdout.decode('UTF-8'))
+    except:
+        logging.exception(f'{message} failed with exit code {proc_result.returncode}')
         with open('failed.txt', 'w') as f:
             f.writelines(proc_result.stderr.decode('UTF-8'))
         
@@ -62,9 +64,18 @@ def callback(message):
         'report.html'
     ]
     for fname in files_to_capture:
-        subprocess.run(f'gsutil -h x-goog-meta-bigrna-run:{dat["run"]} cp {fname} gs://bigrna-cancerdatasci-org/v2/{dat["run"]}/{fname}', shell=True)
-    subprocess.run('rm -rf work', shell=True)
-    subprocess.run('rm '+' '.join(files_to_capture), shell=True)
+        try:
+            subprocess.run(f'gsutil -h x-goog-meta-bigrna-run:{dat["run"]} cp {fname} gs://bigrna-cancerdatasci-org/v2/{dat["run"]}/{fname}', shell=True)
+        except:
+            pass
+    try:
+        subprocess.run('rm -rf work', shell=True)
+    except:
+        pass
+    try:
+        subprocess.run('rm '+' '.join(files_to_capture), shell=True)
+    except:
+        pass
     
 # Substitute PROJECT and SUBSCRIPTION with appropriate values for your
 # application.
