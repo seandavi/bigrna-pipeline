@@ -116,7 +116,7 @@ def run_to_death():
         subscriber.acknowledge(subscription_path, [message.ack_id])
         logging.info(f'acked {message.message}')
         write_std_files(process)
-        cleanup()
+        cleanup(message.message)
 
 # Substitute PROJECT and SUBSCRIPTION with appropriate values for your
 # application.
