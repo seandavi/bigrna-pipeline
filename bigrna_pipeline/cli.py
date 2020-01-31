@@ -2,7 +2,7 @@ import subprocess
 
 import click
 
-from .pubsub import future
+from .pubsub import run_to_death
 
 @click.group()
 def bigrna():
@@ -15,8 +15,7 @@ def get_nextflow():
 
 @bigrna.command(help='start a bigrna pubsub-based worker')
 def start_worker():
-    while True:
-        future.result()
+    run_to_death()
 
 @bigrna.command()
 def check_loc():

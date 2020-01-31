@@ -22,15 +22,16 @@ class Config():
     PUBSUB_SUBSCRIPTION = os.environ.get("PUBSUB_SUBSCRIPTION")
     PUBSUB_TOPIC = os.environ.get("PUBSUB_TOPIC")
 
+    
 def get_subscription_path():
     return subscriber.subscription_path(Config.PROJECT_ID, Config.PUBSUB_SUBSCRIPTION)
 
 
-    
 def make_command_line(experiment: str, run_id: str, index: str, gtf: str):
     nf_loc = pkg_resources.resource_filename('bigrna_pipeline', 'main.nf')
-    #return shlex.split(f'./nextflow run {nf_loc} --run_id {run_id} --experiment {experiment} -with-trace -with-report report.html --index {index} --gtf {gtf} --transcript_version v32')
-    return(['sleep','20'])
+    return shlex.split(f'./nextflow run {nf_loc} --run_id {run_id} --experiment {experiment} -with-trace -with-report report.html --index {index} --gtf {gtf} --transcript_version v32')
+    #return(['sleep','20'])
+
 
 def start_nextflow_subprocess(message) -> subprocess.Popen:
     logging.info('handling message %s', message)
@@ -51,13 +52,16 @@ def get_next_message() -> pubsub_v1.types.message:
 
 
 def write_std_files(process: subprocess.Popen):
-    # TODO: finish this....
+    def get_stream_as_str(stream) -> str:
+        return stream.read().decode('UTF-8')
+    stdout_str = get_stream_as_str(process.stdout)
+    stderr_str = get_stream_as_str(process.stderr)
     with open('process_stdout.txt', 'w') as f:
-        f.writelines(process.stdout.decode('UTF-8'))
-    sys.stdout.writelines(proc_result.stdout.decode('UTF-8'))
+        f.write(stdout_str)
+    sys.stdout.writelines(stdout_str)
     with open('process_stderr.txt', 'w') as f:
-        f.writelines(process.stderr.decode('UTF-8'))
-    sys.stderr.writelines(process.stderr.decode('UTF-8'))
+        f.write(stderr_str)
+    sys.stderr.write(stderr_str)
     
 
 def failed_pipeline(process: subprocess.Popen, message: pubsub_v1.types.message):
@@ -110,6 +114,7 @@ def run_to_death():
             failed_pipeline(process, message.message)
         subscriber.acknowledge(subscription_path, [message.ack_id])
         logging.info(f'acked {message.message}')
+        write_std_files(process)
         cleanup()
 
 # Substitute PROJECT and SUBSCRIPTION with appropriate values for your
