@@ -43,8 +43,10 @@ def callback(message):
         
     with open('process_stdout.txt', 'w') as f:
         f.writelines(proc_result.stdout.decode('UTF-8'))
+    sys.stdout.writelines(proc_result.stdout.decode('UTF-8'))
     with open('process_stderr.txt', 'w') as f:
         f.writelines(proc_result.stderr.decode('UTF-8'))
+    sys.stderr.writelines(proc_result.stderr.decode('UTF-8'))
     # we are going to ack everything
     message.ack()
     logging.debug(f'generated command-line {z}')
