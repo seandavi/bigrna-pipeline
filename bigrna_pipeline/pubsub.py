@@ -44,8 +44,13 @@ def start_nextflow_subprocess(message) -> subprocess.Popen:
 
 def get_next_message() -> pubsub_v1.types.message:
     subscription_path = get_subscription_path()
-    response = subscriber.pull(subscription_path, max_messages = 1)
+    response = subscriber.pull(
+        subscription_path,
+        max_messages = 1,
+        timeout = 30.0 # see https://github.com/googleapis/google-cloud-python/issues/9390#issuecomment-561883278
+    )
     # should be only one message
+    message = None
     for r in response.received_messages:
         message = r
     return message
@@ -98,7 +103,9 @@ def run_to_death():
     subscription_path = get_subscription_path()
     while True:
         message = get_next_message()
-        print(message)
+        if(message is None):
+            logging.info('Message queue appears to be empty')
+            break
         process = start_nextflow_subprocess(message.message)
         n = 0
         SLEEP_INTERVAL=10
