@@ -129,6 +129,7 @@ def run_to_death():
         logging.info(f'acked {message.message}')
         write_std_files(process)
         cleanup(message.message)
+    logging.info('exiting naturally')
 
 # Substitute PROJECT and SUBSCRIPTION with appropriate values for your
 # application.
