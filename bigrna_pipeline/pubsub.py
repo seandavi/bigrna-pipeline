@@ -29,7 +29,7 @@ def get_subscription_path():
 
 def make_command_line(experiment: str, run_id: str, index: str, gtf: str):
     nf_loc = pkg_resources.resource_filename('bigrna_pipeline', 'main.nf')
-    return shlex.split(f'./nextflow run {nf_loc}  --run_id {run_id} --experiment {experiment} -Dcapsule.log=verbose -with-trace -with-report report.html --index {index} --gtf {gtf} --transcript_version v32')
+    return shlex.split(f'./nextflow run {nf_loc}  --run_id {run_id} --experiment {experiment} -with-trace -with-report report.html --index {index} --gtf {gtf} --transcript_version v32')
     #return(['sleep','20'])
 
 
